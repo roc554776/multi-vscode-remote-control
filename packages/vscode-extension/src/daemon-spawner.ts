@@ -9,7 +9,7 @@ export class DaemonSpawner {
   private daemonPath: string;
 
   constructor() {
-    const dir = path.join(os.homedir(), '.multi-vscode');
+    const dir = path.join(os.homedir(), '.multi-vscode-remote-control');
     
     if (process.platform === 'win32') {
       this.socketPath = '\\\\.\\pipe\\multi-vscode-daemon';

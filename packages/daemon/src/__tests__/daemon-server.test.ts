@@ -18,7 +18,7 @@ void describe('DaemonServer Integration', () => {
     if (process.platform === 'win32') {
       daemonSocketPath = '\\\\.\\pipe\\multi-vscode-daemon';
     } else {
-      const dir = path.join(os.homedir(), '.multi-vscode');
+      const dir = path.join(os.homedir(), '.multi-vscode-remote-control');
       daemonSocketPath = path.join(dir, 'daemon.sock');
     }
     

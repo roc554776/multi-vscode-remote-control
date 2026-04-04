@@ -35,7 +35,7 @@ export class DaemonClient {
     if (process.platform === 'win32') {
       this.daemonSocketPath = '\\\\.\\pipe\\multi-vscode-daemon';
     } else {
-      const dir = path.join(os.homedir(), '.multi-vscode');
+      const dir = path.join(os.homedir(), '.multi-vscode-remote-control');
       this.daemonSocketPath = path.join(dir, 'daemon.sock');
     }
   }

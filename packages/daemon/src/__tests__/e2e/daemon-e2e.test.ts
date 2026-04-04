@@ -306,7 +306,7 @@ function getDaemonSocketPath(): string {
   if (process.platform === 'win32') {
     return '\\\\.\\pipe\\multi-vscode-daemon';
   }
-  const dir = path.join(os.homedir(), '.multi-vscode');
+  const dir = path.join(os.homedir(), '.multi-vscode-remote-control');
   return path.join(dir, 'daemon.sock');
 }
 

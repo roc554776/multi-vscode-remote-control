@@ -30,7 +30,7 @@ export class DaemonServer {
     if (process.platform === 'win32') {
       this.socketPath = '\\\\.\\pipe\\multi-vscode-daemon';
     } else {
-      const dir = path.join(os.homedir(), '.multi-vscode');
+      const dir = path.join(os.homedir(), '.multi-vscode-remote-control');
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { mode: 0o700 });
       }
