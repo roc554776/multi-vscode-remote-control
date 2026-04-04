@@ -1,0 +1,39 @@
+{
+  "name": "multi-vscode-remote-control",
+  "displayName": "Multi VSCode Remote Control",
+  "description": "Remote control multiple VSCode instances via IPC",
+  "version": "0.1.0",
+  "publisher": "roc",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/roc554776/multi-vscode-remote-control.git"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {},
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "prepare:daemon": "node prepare-daemon.mjs",
+    "package": "npm run prepare:daemon && vsce package --allow-missing-repository --skip-license --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.19.0",
+    "typescript": "^5.3.0",
+    "zod": "^3.22.0"
+  },
+  "dependencies": {
+    "zod": "^3.22.0"
+  }
+}
