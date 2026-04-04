@@ -64,4 +64,43 @@ python3 test-tabs-close.py "file:///nonexistent/file.ts"
 
 ## 自動テスト
 
-（将来的に追加予定）
+プロジェクトには以下の自動テストが含まれています。
+
+### E2E テスト
+
+VSCode 拡張機能と Daemon の統合テストが実装されています。
+
+#### テスト構成
+
+- **VSCode Extension E2E**: vitest + @vscode/test-electron を使用
+  - 拡張機能のアクティベーション確認
+  - Daemon ソケットの作成確認
+  - `packages/vscode-extension/src/test/suite/extension.test.ts`
+
+- **Daemon E2E**: node:test を使用
+  - Daemon サーバーの起動と接続
+  - Extension Host の登録と JSON-RPC 通信
+  - ラウンドロビン機能の検証
+  - エラーハンドリングのテスト
+  - `packages/daemon/src/__tests__/e2e/daemon-e2e.test.ts`
+
+#### 実行方法
+
+```bash
+# VSCode Extension の E2E テスト
+cd packages/vscode-extension
+npm run test:e2e
+
+# Daemon の E2E テスト
+cd packages/daemon
+npm test
+
+# ワークスペース全体のテスト実行
+cd /path/to/multi-vscode-remote-control
+npm test
+```
+
+#### CI/CD について
+
+現在、このリポジトリは private のため GitHub Actions は設定していません。
+テストはローカル環境で実行してください。
