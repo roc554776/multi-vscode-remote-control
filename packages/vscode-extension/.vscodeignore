@@ -2,3 +2,4 @@
 !dist/**
 !daemon/dist/**
 !package.json
+.vscode-test/

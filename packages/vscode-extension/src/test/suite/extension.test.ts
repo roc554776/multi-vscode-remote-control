@@ -1,29 +1,28 @@
-import * as assert from 'assert';
+import { describe, it } from 'node:test';
+import { expect } from 'vitest';
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 
-suite('Multi VSCode Remote Control E2E Tests', () => {
-  test('Extension should be present', () => {
+describe('Multi VSCode Remote Control E2E Tests', () => {
+  it('should find extension', () => {
     const ext = vscode.extensions.getExtension('roc.multi-vscode-remote-control');
-    assert.ok(ext, 'Extension should be found');
+    expect(ext).toBeDefined();
   });
 
-  test('Extension should activate on startup', async function () {
-    this.timeout(10000);
+  it('should activate extension on startup', async () => {
     await new Promise((resolve) => setTimeout(resolve, 3000));
 
     const ext = vscode.extensions.getExtension('roc.multi-vscode-remote-control');
-    assert.ok(ext?.isActive, 'Extension should be active');
+    expect(ext?.isActive).toBe(true);
   });
 
-  test('Daemon socket should be created', async function () {
-    this.timeout(15000);
+  it('should create daemon socket', async () => {
     await new Promise((resolve) => setTimeout(resolve, 5000));
 
     const socketPath = path.join(os.homedir(), '.multi-vscode-remote-control', 'daemon.sock');
     const exists = fs.existsSync(socketPath);
-    assert.ok(exists, `Socket should exist at ${socketPath}`);
+    expect(exists).toBe(true);
   });
 });
