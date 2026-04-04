@@ -46,7 +46,7 @@ class IPCClient:
 
 def cleanup_sockets():
     """Remove stale sockets."""
-    vcc_dir = Path.home() / '.multi-vscode'
+    vcc_dir = Path.home() / '.multi-vscode-remote-control'
     if vcc_dir.exists():
         for sock in vcc_dir.glob('*.sock'):
             sock.unlink()
@@ -68,7 +68,7 @@ def test_daemon():
     """Run integration tests."""
     repo_root = Path(__file__).parent.parent
     daemon_path = repo_root / 'packages' / 'daemon' / 'dist' / 'index.js'
-    daemon_socket = Path.home() / '.multi-vscode' / 'daemon.sock'
+    daemon_socket = Path.home() / '.multi-vscode-remote-control' / 'daemon.sock'
     
     if not daemon_path.exists():
         print(f"Error: Daemon not found at {daemon_path}")
