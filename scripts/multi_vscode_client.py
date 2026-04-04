@@ -12,7 +12,7 @@ def get_socket_path() -> str:
     """Get the IPC socket path based on platform."""
     if sys.platform == "win32":
         return r"\\.\pipe\multi-vscode-remote-control"
-    return str(Path.home() / ".multi-vscode" / "vcc.sock")
+    return str(Path.home() / ".multi-vscode-remote-control" / "daemon.sock")
 
 
 def send_request(
