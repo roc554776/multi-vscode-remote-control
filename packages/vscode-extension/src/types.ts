@@ -91,6 +91,7 @@ export interface ChatQueryResult {
 export const CommandExecuteParamsSchema = z.object({
   command: z.string(),
   args: z.array(z.unknown()).optional().default([]),
+  timeout: z.number().optional(),
 });
 
 export type CommandExecuteParams = z.infer<typeof CommandExecuteParamsSchema>;
