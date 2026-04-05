@@ -33,7 +33,7 @@ async function main() {
     platform: 'node',
     outdir: 'dist',
     outExtension: { '.js': '.mjs' },
-    external: ['vscode', 'vitest', 'vitest/*', '@vitest/*', 'vite', 'glob', 'node:*'],
+    external: ['vscode', 'vitest', 'vitest/*', '@vitest/*', 'vite', 'glob', 'node:*', 'mocha', 'assert'],
     logLevel: 'info',
   });
 
