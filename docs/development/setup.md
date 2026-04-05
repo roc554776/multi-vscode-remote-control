@@ -27,11 +27,8 @@ npm run build
 npm run lint
 ```
 
-このプロジェクトでは TypeScript の厳格な型チェックを行っています。特に以下を守ってください:
-
-- `@typescript-eslint/no-unsafe-*` ルールに違反しないこと
-- `as` による型アサーションを使わないこと
-- 型の narrowing には `zod`（`safeParse`）や `instanceof`、`in` 演算子を使うこと
+コード品質ルール（TypeScript 厳格チェック、`as` 禁止、型ガード方針）は
+[コード品質ガイド](./code-quality.md) を参照してください。
 
 ## 拡張機能の更新を VSCode に反映する方法
 

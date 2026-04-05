@@ -54,30 +54,5 @@ docs/
 
 ## コード品質
 
-### Linting
-
-以下のコマンドで lint を実行してください:
-
-```bash
-npm run lint
-```
-
-このプロジェクトでは TypeScript の厳格な型チェックを強制しています:
-
-- `@typescript-eslint/no-unsafe-*` ルールが有効
-- 型アサーション（`as`）は禁止
-- 型ガードには `zod` または `instanceof` を使用
-
-### 型安全性
-
-型の narrowing には以下を使用してください:
-
-✅ 推奨:
-- `zod` スキーマ + `safeParse`
-- `instanceof` チェック
-- `in` 演算子での型ガード
-
-❌ 禁止:
-- `as TypeName`
-- `as unknown as TypeName`
-- `!`（non-null assertion）
+開発ルール（lint・型安全性・TypeScript strict 運用）は  
+[`docs/development/code-quality.md`](docs/development/code-quality.md) を参照してください。
