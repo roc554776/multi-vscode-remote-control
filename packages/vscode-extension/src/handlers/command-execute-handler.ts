@@ -17,7 +17,11 @@ const URI_COMMANDS = [
 /**
  * Check if a string appears to be a URI with a scheme (e.g., file://, untitled:, vscode-remote:)
  */
-function hasUriScheme(str: string): boolean {
+export function hasUriScheme(str: string): boolean {
+  // Avoid treating Windows drive-letter paths (e.g., C:\foo or C:/foo) as URI schemes
+  if (/^[a-z]:[\\/]/i.test(str)) {
+    return false;
+  }
   return /^[a-z][a-z0-9+.-]*:/i.test(str);
 }
 
@@ -26,7 +30,7 @@ function hasUriScheme(str: string): boolean {
  * - If the first argument already has a scheme (file://, untitled:, etc.), use Uri.parse()
  * - Otherwise, treat it as a file path and use Uri.file()
  */
-function convertArgsForCommand(command: string, args: unknown[]): unknown[] {
+export function convertArgsForCommand(command: string, args: unknown[]): unknown[] {
   if (!URI_COMMANDS.includes(command)) {
     return args;
   }
