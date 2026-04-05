@@ -86,3 +86,11 @@ export interface ChatQueryResult {
   response: string;
   model: string;
 }
+
+// command.execute params schema
+export const CommandExecuteParamsSchema = z.object({
+  command: z.string(),
+  args: z.array(z.unknown()).optional().default([]),
+});
+
+export type CommandExecuteParams = z.infer<typeof CommandExecuteParamsSchema>;

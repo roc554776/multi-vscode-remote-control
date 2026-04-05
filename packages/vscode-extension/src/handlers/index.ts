@@ -3,6 +3,9 @@ import { JSON_RPC_ERRORS } from '../types.js';
 import { handlePing } from './ping-handler.js';
 import { handleTabsList } from './tabs-list-handler.js';
 import { handleTabsClose } from './tabs-close-handler.js';
+import { handleCommandExecute } from './command-execute-handler.js';
+import { handleWindowReload } from './window-reload-handler.js';
+import { handleWindowQuit } from './window-quit-handler.js';
 
 type Handler = (request: JsonRpcRequest) => JsonRpcResponse | Promise<JsonRpcResponse>;
 
@@ -10,6 +13,9 @@ const handlers: Record<string, Handler> = {
   ping: (req) => handlePing(req.id ?? null),
   'tabs.list': handleTabsList,
   'tabs.close': handleTabsClose,
+  'command.execute': handleCommandExecute,
+  'window.reload': handleWindowReload,
+  'window.quit': handleWindowQuit,
 };
 
 export function dispatch(request: JsonRpcRequest): JsonRpcResponse | Promise<JsonRpcResponse> {
