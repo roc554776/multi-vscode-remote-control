@@ -121,6 +121,32 @@ describe('handleChatQuery', () => {
     });
   });
 
+  it('returns model unavailable error when first model is undefined', async () => {
+    vi.mocked(vscode.lm.selectChatModels)
+      .mockResolvedValueOnce([{ id: 'catalog-model' } as any])
+      .mockResolvedValueOnce([undefined as any]);
+
+    const request: JsonRpcRequest = {
+      jsonrpc: '2.0',
+      method: 'chat.query',
+      id: 6,
+      params: {
+        prompt: 'Undefined model test',
+      },
+    };
+
+    const response = await handleChatQuery(request);
+
+    expect(response).toEqual({
+      jsonrpc: '2.0',
+      error: {
+        code: -32001,
+        message: 'No language models available. Make sure Copilot is installed and you are signed in.',
+      },
+      id: 6,
+    });
+  });
+
   it('returns language model error details when sendRequest throws LanguageModelError', async () => {
     const sendRequest = vi.fn().mockRejectedValue(new vscode.LanguageModelError('Quota exceeded', 'quota_exceeded'));
 
