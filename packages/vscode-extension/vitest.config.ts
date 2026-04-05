@@ -6,9 +6,17 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   test: {
+    include: ['src/**/*.spec.ts'],
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/.{idea,git,cache,output,temp}/**',
+      '**/test/**',
+    ],
+    environment: 'node',
+    globals: true,
     testTimeout: 30000,
     hookTimeout: 30000,
-    globals: false,
     alias: {
       vscode: path.resolve(__dirname, 'src/test/mocks/vscode.ts'),
     },
