@@ -21,6 +21,18 @@ npm install
 npm run build
 ```
 
+3. lint の実行
+
+```bash
+npm run lint
+```
+
+このプロジェクトでは TypeScript の厳格な型チェックを行っています。特に以下を守ってください:
+
+- `@typescript-eslint/no-unsafe-*` ルールに違反しないこと
+- `as` による型アサーションを使わないこと
+- 型の narrowing には `zod`（`safeParse`）や `instanceof`、`in` 演算子を使うこと
+
 ## 拡張機能の更新を VSCode に反映する方法
 
 拡張機能を更新して VSCode に反映する際は、**必ず** `scripts/reload-extension.py` を使用してください。  

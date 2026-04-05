@@ -49,3 +49,35 @@ docs/
 2. **rfp**: raw-rfp の内容を整理して rfp/ にまとめる
 3. **requirements**: rfp から要件を抽出して requirements/ に定義する
 4. **実装**: 要件に基づいてコードを実装する
+
+---
+
+## コード品質
+
+### Linting
+
+以下のコマンドで lint を実行してください:
+
+```bash
+npm run lint
+```
+
+このプロジェクトでは TypeScript の厳格な型チェックを強制しています:
+
+- `@typescript-eslint/no-unsafe-*` ルールが有効
+- 型アサーション（`as`）は禁止
+- 型ガードには `zod` または `instanceof` を使用
+
+### 型安全性
+
+型の narrowing には以下を使用してください:
+
+✅ 推奨:
+- `zod` スキーマ + `safeParse`
+- `instanceof` チェック
+- `in` 演算子での型ガード
+
+❌ 禁止:
+- `as TypeName`
+- `as unknown as TypeName`
+- `!`（non-null assertion）
