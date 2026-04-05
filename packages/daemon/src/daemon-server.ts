@@ -52,6 +52,13 @@ export class DaemonServer {
         fs.chmodSync(this.socketPath, 0o600);
       }
     } catch (err) {
+      if (this.hasErrorCode(err, 'EADDRINUSE')) {
+        // Socket already in use - another daemon is running
+        this.log('Socket already in use - daemon is already running');
+        process.exit(0);
+        return;
+      }
+
       this.log(`Server error: ${err instanceof Error ? err.message : String(err)}`);
       throw err;
     }
@@ -265,6 +272,14 @@ export class DaemonServer {
     console.log(`[${timestamp}] [multi-vscode-daemon] ${message}`);
   }
 
+  private hasErrorCode(err: unknown, code: string): boolean {
+    if (!(err instanceof Error) || !('code' in err)) {
+      return false;
+    }
+
+    return typeof err.code === 'string' && err.code === code;
+  }
+
   private async listenWithRecovery(): Promise<void> {
     try {
       await this.listenOnce();
@@ -272,9 +287,7 @@ export class DaemonServer {
     } catch (err) {
       if (
         process.platform !== 'win32' &&
-        err instanceof Error &&
-        'code' in err &&
-        err.code === 'EADDRINUSE' &&
+        this.hasErrorCode(err, 'EADDRINUSE') &&
         await this.isStaleSocket()
       ) {
         this.log('Detected stale daemon socket (ECONNREFUSED), unlinking and retrying');
