@@ -6,6 +6,7 @@ import { handleTabsClose } from './tabs-close-handler.js';
 import { handleCommandExecute } from './command-execute-handler.js';
 import { handleWindowReload } from './window-reload-handler.js';
 import { handleWindowQuit } from './window-quit-handler.js';
+import { handleFileOpen } from './file-open-handler.js';
 
 type Handler = (request: JsonRpcRequest) => JsonRpcResponse | Promise<JsonRpcResponse>;
 
@@ -16,6 +17,7 @@ const handlers: Record<string, Handler> = {
   'command.execute': handleCommandExecute,
   'window.reload': handleWindowReload,
   'window.quit': handleWindowQuit,
+  'file.open': handleFileOpen,
 };
 
 export function dispatch(request: JsonRpcRequest): JsonRpcResponse | Promise<JsonRpcResponse> {

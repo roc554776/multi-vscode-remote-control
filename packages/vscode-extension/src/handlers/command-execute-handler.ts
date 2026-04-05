@@ -26,30 +26,55 @@ export async function handleCommandExecute(request: JsonRpcRequest): Promise<Jso
   const { command, args, timeout } = parseResult.data;
   const timeoutMs = timeout ?? DEFAULT_TIMEOUT_MS;
 
-  const commandPromise = vscode.commands.executeCommand(command, ...args);
+  try {
+    const commandPromise = vscode.commands.executeCommand(command, ...args);
 
-  // Race between the command execution and a timeout
-  const timeoutPromise = new Promise<{ timedOut: true }>((resolve) => {
-    setTimeout(() => resolve({ timedOut: true }), timeoutMs);
-  });
+    // Race between the command execution and a timeout
+    const timeoutPromise = new Promise<{ timedOut: true }>((resolve) => {
+      setTimeout(() => resolve({ timedOut: true }), timeoutMs);
+    });
 
-  const result = await Promise.race([
-    commandPromise.then((value) => ({ timedOut: false as const, value })),
-    timeoutPromise,
-  ]);
+    const result = await Promise.race([
+      commandPromise.then(
+        (value) => ({ timedOut: false as const, value }),
+        (error: unknown) => ({ timedOut: false as const, error: error instanceof Error ? error.message : String(error) }),
+      ),
+      timeoutPromise,
+    ]);
 
-  if (result.timedOut) {
-    // Command didn't complete within timeout, but it was likely dispatched successfully
+    if (result.timedOut) {
+      // Command didn't complete within timeout, but it was likely dispatched successfully
+      return {
+        jsonrpc: '2.0',
+        result: { dispatched: true, command, message: 'Command dispatched (no response within timeout)' },
+        id: request.id ?? null,
+      };
+    }
+
+    if ('error' in result) {
+      return {
+        jsonrpc: '2.0',
+        error: {
+          ...JSON_RPC_ERRORS.INTERNAL_ERROR,
+          message: `Command failed: ${result.error}`,
+        },
+        id: request.id ?? null,
+      };
+    }
+
     return {
       jsonrpc: '2.0',
-      result: { dispatched: true, command, message: 'Command dispatched (no response within timeout)' },
+      result: result.value,
+      id: request.id ?? null,
+    };
+  } catch (error) {
+    return {
+      jsonrpc: '2.0',
+      error: {
+        ...JSON_RPC_ERRORS.INTERNAL_ERROR,
+        message: `Unexpected error: ${error instanceof Error ? error.message : String(error)}`,
+      },
       id: request.id ?? null,
     };
   }
-
-  return {
-    jsonrpc: '2.0',
-    result: result.value,
-    id: request.id ?? null,
-  };
 }
