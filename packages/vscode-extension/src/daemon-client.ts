@@ -1,9 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import * as net from 'node:net';
-import * as path from 'node:path';
-import * as os from 'node:os';
 import { z } from 'zod';
 import { DaemonSpawner } from './daemon-spawner.js';
+import { getDaemonSocketPath } from './daemon-socket-path.js';
 import { dispatch } from './handlers/index.js';
 import { JsonRpcRequestSchema } from './types.js';
 import type { JsonRpcResponse } from './types.js';
@@ -38,13 +37,7 @@ export class DaemonClient {
     this.extensionId = randomUUID();
     this.outputChannel = outputChannel;
     this.spawner = new DaemonSpawner();
-
-    if (process.platform === 'win32') {
-      this.daemonSocketPath = '\\\\.\\pipe\\multi-vscode-daemon';
-    } else {
-      const dir = path.join(os.homedir(), '.multi-vscode-remote-control');
-      this.daemonSocketPath = path.join(dir, 'daemon.sock');
-    }
+    this.daemonSocketPath = getDaemonSocketPath();
   }
 
   async start(): Promise<void> {
@@ -67,6 +60,9 @@ export class DaemonClient {
       this.daemonConnection.destroy();
       this.daemonConnection = null;
     }
+    this.spawner.stopSpawnedDaemon((msg) => {
+      this.log(msg);
+    });
   }
 
   private async connectAndRegister(): Promise<void> {
