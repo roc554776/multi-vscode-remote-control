@@ -68,9 +68,21 @@ export type TabsCloseParams = z.infer<typeof TabsCloseParamsSchema>;
 // chat.send params schema
 export const ChatSendParamsSchema = z.object({
   prompt: z.string(),
+  sync: z.boolean().optional().default(false),
 });
 
 export type ChatSendParams = z.infer<typeof ChatSendParamsSchema>;
+
+export interface ChatSendResult {
+  success: boolean;
+  message: string;
+  response?: {
+    errorDetails?: {
+      code?: string;
+      message?: string;
+    };
+  };
+}
 
 // chat.query params schema (send prompt and get response)
 export const ChatQueryParamsSchema = z.object({
