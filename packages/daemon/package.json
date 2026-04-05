@@ -10,7 +10,8 @@
   "scripts": {
     "build": "node esbuild.mjs",
     "watch": "node esbuild.mjs --watch",
-    "test": "npm run build && node --test dist/__tests__/*.test.js dist/__tests__/**/*.test.js"
+    "test": "npm run build && node --test dist/__tests__/*.test.js dist/__tests__/**/*.test.js",
+    "lint": "eslint src"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

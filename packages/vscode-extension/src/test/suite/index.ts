@@ -13,7 +13,7 @@ export async function run(): Promise<void> {
   // Find all test files
   const testFiles = await glob('**/*.test.mjs', { cwd: testsRoot });
   
-  console.log(`Found ${testFiles.length} test file(s)`);
+  console.log(`Found ${String(testFiles.length)} test file(s)`);
   
   if (testFiles.length === 0) {
     throw new Error('No test files found');

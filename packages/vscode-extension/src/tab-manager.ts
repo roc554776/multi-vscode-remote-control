@@ -2,23 +2,28 @@ import * as vscode from 'vscode';
 import type { TabInfo, TabsListResult, TabsCloseResult } from './types.js';
 
 export class TabManager {
+  private getTabInputUri(tabInput: unknown): vscode.Uri | null {
+    if (tabInput instanceof vscode.TabInputText) {
+      return tabInput.uri;
+    }
+    return null;
+  }
+
   listTabs(): TabsListResult {
     const tabs: TabInfo[] = [];
     let activeTabUri: string | null = null;
 
     for (const group of vscode.window.tabGroups.all) {
-      const groupIndex = group.viewColumn ? group.viewColumn - 1 : 0;
+      const groupIndex = group.viewColumn - 1;
       
       for (let index = 0; index < group.tabs.length; index++) {
         const tab = group.tabs[index];
         if (!tab) continue;
         
         let uri: string | null = null;
-        
-        // TabInputText の場合のみ URI を取得
-        if (tab.input && typeof tab.input === 'object' && 'uri' in tab.input) {
-          const input = tab.input as { uri?: vscode.Uri };
-          uri = input.uri?.toString() ?? null;
+        const tabUri = this.getTabInputUri(tab.input);
+        if (tabUri) {
+          uri = tabUri.toString();
         }
 
         const tabInfo: TabInfo = {
@@ -51,12 +56,10 @@ export class TabManager {
     try {
       if (tab.isDirty && save) {
         // タブを開いて保存
-        if (tab.input && typeof tab.input === 'object' && 'uri' in tab.input) {
-          const input = tab.input as { uri?: vscode.Uri };
-          if (input.uri) {
-            const doc = await vscode.workspace.openTextDocument(input.uri);
-            await doc.save();
-          }
+        const tabUri = this.getTabInputUri(tab.input);
+        if (tabUri) {
+          const doc = await vscode.workspace.openTextDocument(tabUri);
+          await doc.save();
         }
       }
 
@@ -70,11 +73,9 @@ export class TabManager {
   private findTabByUri(uri: string): vscode.Tab | null {
     for (const group of vscode.window.tabGroups.all) {
       for (const tab of group.tabs) {
-        if (tab.input && typeof tab.input === 'object' && 'uri' in tab.input) {
-          const input = tab.input as { uri?: vscode.Uri };
-          if (input.uri?.toString() === uri) {
-            return tab;
-          }
+        const tabUri = this.getTabInputUri(tab.input);
+        if (tabUri && tabUri.toString() === uri) {
+          return tab;
         }
       }
     }

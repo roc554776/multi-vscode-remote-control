@@ -18,7 +18,7 @@ export class Router {
           const response = await this.routeOnce(request, targetHost);
           resolve(response);
         } catch (err) {
-          reject(err);
+          reject(err instanceof Error ? err : new Error(String(err)));
         }
       };
 

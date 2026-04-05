@@ -108,8 +108,15 @@ void describe('DaemonServer E2E', { concurrency: 1 }, () => {
     ]);
 
     const routedIds = responses.map((response) => {
-      const result = response.result as { extensionId: string };
-      return result.extensionId;
+      if (
+        typeof response.result === 'object' &&
+        response.result !== null &&
+        'extensionId' in response.result &&
+        typeof (response.result as Record<string, unknown>)['extensionId'] === 'string'
+      ) {
+        return (response.result as Record<string, unknown>)['extensionId'] as string;
+      }
+      throw new Error('Invalid response result');
     });
 
     assert.notStrictEqual(routedIds[0], routedIds[1]);
@@ -143,8 +150,17 @@ void describe('DaemonServer E2E', { concurrency: 1 }, () => {
       id: 10,
     });
 
-    const result = response.result as { extensionId: string };
-    assert.strictEqual(result.extensionId, 'ext-b');
+    if (
+      typeof response.result === 'object' &&
+      response.result !== null &&
+      'extensionId' in response.result &&
+      typeof (response.result as Record<string, unknown>)['extensionId'] === 'string'
+    ) {
+      const extId = (response.result as Record<string, unknown>)['extensionId'] as string;
+      assert.strictEqual(extId, 'ext-b');
+    } else {
+      throw new Error('Invalid response result');
+    }
   });
 
   void it('JSON-RPC エラーケース', async () => {
@@ -198,9 +214,17 @@ async function registerExtensionHost(
           typeof parsed === 'object' &&
           parsed !== null &&
           'jsonrpc' in parsed &&
-          'method' in parsed
+          'method' in parsed &&
+          typeof (parsed as Record<string, unknown>)['jsonrpc'] === 'string' &&
+          typeof (parsed as Record<string, unknown>)['method'] === 'string'
         ) {
-          const request = parsed as JsonRpcRequest;
+          const p: Record<string, unknown> = parsed;
+          const request: JsonRpcRequest = {
+            jsonrpc: '2.0',
+            method: p['method'] as string,
+            params: 'params' in p ? p['params'] : undefined,
+            id: 'id' in p ? (p['id'] as string | number | null | undefined) : undefined,
+          };
           const response = onRequest(request);
           socket.write(JSON.stringify(response) + '\n');
         }
@@ -221,7 +245,17 @@ async function sendRaw(daemonSocketPath: string, line: string): Promise<JsonRpcR
   const socket = await connectSocket(daemonSocketPath);
   try {
     const response = await sendAndReceive(socket, line);
-    return response as JsonRpcResponse;
+    if (
+      typeof response === 'object' &&
+      response !== null &&
+      'jsonrpc' in response &&
+      'id' in response
+    ) {
+      // Type assertion here is safe after validation
+      const jsonrpcResponse: JsonRpcResponse = response as JsonRpcResponse;
+      return jsonrpcResponse;
+    }
+    throw new Error('Invalid response');
   } finally {
     socket.end();
     socket.destroy();

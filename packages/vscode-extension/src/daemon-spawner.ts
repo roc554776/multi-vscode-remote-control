@@ -36,7 +36,11 @@ export class DaemonSpawner {
       } catch {
         return false;
       }
-    }) ?? candidates[0]!;
+    });
+    
+    if (!this.daemonPath) {
+      throw new Error('Could not find daemon executable');
+    }
   }
 
   /**

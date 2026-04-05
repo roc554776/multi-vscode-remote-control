@@ -2,10 +2,11 @@ import { randomUUID } from 'node:crypto';
 import * as net from 'node:net';
 import * as path from 'node:path';
 import * as os from 'node:os';
+import { z } from 'zod';
 import { DaemonSpawner } from './daemon-spawner.js';
 import { dispatch } from './handlers/index.js';
 import { JsonRpcRequestSchema } from './types.js';
-import type { JsonRpcRequest, JsonRpcResponse } from './types.js';
+import type { JsonRpcResponse } from './types.js';
 
 interface RegisterMessage {
   type: 'register';
@@ -17,6 +18,12 @@ interface RegisterAckMessage {
   success: boolean;
   error?: string;
 }
+
+const RegisterAckMessageSchema = z.object({
+  type: z.literal('register-ack'),
+  success: z.boolean(),
+  error: z.string().optional(),
+});
 
 export class DaemonClient {
   private extensionId: string;
@@ -42,12 +49,14 @@ export class DaemonClient {
 
   async start(): Promise<void> {
     // daemon が起動していなければ spawn し、ready になるまで待つ
-    await this.spawner.ensureDaemonRunning((msg) => this.log(msg));
+    await this.spawner.ensureDaemonRunning((msg) => {
+      this.log(msg);
+    });
     this.stopping = false;
     await this.connectAndRegister();
   }
 
-  async stop(): Promise<void> {
+  stop(): void {
     this.stopping = true;
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
@@ -71,27 +80,23 @@ export class DaemonClient {
 
     const response = await this.sendRegisterMessage(socket, message);
 
-    if (response.type === 'register-ack') {
-      if (response.success) {
-        this.log(`Registered to daemon: ${this.extensionId}`);
-        
-        // Setup request handler for incoming requests from daemon
-        this.setupRequestHandler(socket);
-        
-        socket.on('close', () => {
-          this.log('Daemon connection closed');
-          if (!this.stopping) {
-            this.scheduleReconnect();
-          }
-        });
-        socket.on('error', (err) => {
-          this.log(`Daemon connection error: ${err.message}`);
-        });
-      } else {
-        throw new Error(`Failed to register: ${response.error ?? 'unknown error'}`);
-      }
+    if (response.success) {
+      this.log(`Registered to daemon: ${this.extensionId}`);
+      
+      // Setup request handler for incoming requests from daemon
+      this.setupRequestHandler(socket);
+      
+      socket.on('close', () => {
+        this.log('Daemon connection closed');
+        if (!this.stopping) {
+          this.scheduleReconnect();
+        }
+      });
+      socket.on('error', (err) => {
+        this.log(`Daemon connection error: ${err.message}`);
+      });
     } else {
-      throw new Error('Unexpected response type');
+      throw new Error(`Failed to register: ${response.error ?? 'unknown error'}`);
     }
   }
 
@@ -137,7 +142,12 @@ export class DaemonClient {
               const response: unknown = JSON.parse(line);
               cleanup();
               socket.setTimeout(0);
-              resolve(response as RegisterAckMessage);
+              const parsed = RegisterAckMessageSchema.safeParse(response);
+              if (parsed.success) {
+                resolve(parsed.data);
+              } else {
+                reject(new Error('Invalid register response'));
+              }
               return;
             } catch (err) {
               cleanup();
@@ -180,7 +190,7 @@ export class DaemonClient {
       if (this.stopping) {
         return;
       }
-      void this.connectAndRegister().catch((err) => {
+      void this.connectAndRegister().catch((err: unknown) => {
         this.log(`Reconnect failed: ${String(err)}`);
         this.scheduleReconnect();
       });

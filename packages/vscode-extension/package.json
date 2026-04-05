@@ -25,7 +25,8 @@
     "watch": "node esbuild.mjs --watch",
     "prepare:daemon": "node prepare-daemon.mjs",
     "package": "npm run prepare:daemon && vsce package --allow-missing-repository --skip-license --no-dependencies",
-    "test:e2e": "node run-tests.mjs"
+    "test:e2e": "node run-tests.mjs",
+    "lint": "eslint src"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

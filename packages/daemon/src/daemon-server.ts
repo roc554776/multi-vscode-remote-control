@@ -52,15 +52,7 @@ export class DaemonServer {
         fs.chmodSync(this.socketPath, 0o600);
       }
     } catch (err) {
-      const error = err as NodeJS.ErrnoException;
-      if (error.code === 'EADDRINUSE') {
-        // Socket already in use - another daemon is running
-        this.log('Socket already in use - daemon is already running');
-        process.exit(0);
-        return;
-      }
-
-      this.log(`Server error: ${error.message}`);
+      this.log(`Server error: ${err instanceof Error ? err.message : String(err)}`);
       throw err;
     }
   }
@@ -147,7 +139,7 @@ export class DaemonServer {
         id: null,
       };
       socket.write(JSON.stringify(errorResponse) + '\n');
-    } catch (err) {
+    } catch {
       const errorResponse: JsonRpcResponse = {
         jsonrpc: '2.0',
         error: {
@@ -247,11 +239,22 @@ export class DaemonServer {
       }
     }
 
+    let errorMessage: string;
+    if (lastError instanceof Error) {
+      errorMessage = lastError.message;
+    } else if (typeof lastError === 'string') {
+      errorMessage = lastError;
+    } else if (lastError !== undefined && lastError !== null) {
+      errorMessage = JSON.stringify(lastError);
+    } else {
+      errorMessage = 'unknown error';
+    }
+
     return {
       jsonrpc: '2.0',
       error: {
         code: -32603,
-        message: `Routing failed: ${String(lastError ?? 'unknown error')}`,
+        message: `Routing failed: ${errorMessage}`,
       },
       id: request.id ?? null,
     };
@@ -267,11 +270,11 @@ export class DaemonServer {
       await this.listenOnce();
       return;
     } catch (err) {
-      const error = err as NodeJS.ErrnoException;
-
       if (
         process.platform !== 'win32' &&
-        error.code === 'EADDRINUSE' &&
+        err instanceof Error &&
+        'code' in err &&
+        err.code === 'EADDRINUSE' &&
         await this.isStaleSocket()
       ) {
         this.log('Detected stale daemon socket (ECONNREFUSED), unlinking and retrying');
@@ -286,6 +289,11 @@ export class DaemonServer {
 
   private async listenOnce(): Promise<void> {
     await new Promise<void>((resolve, reject) => {
+      if (!this.server) {
+        reject(new Error('Server not initialized'));
+        return;
+      }
+
       const onListening = () => {
         cleanup();
         resolve();
@@ -297,13 +305,15 @@ export class DaemonServer {
       };
 
       const cleanup = () => {
-        this.server!.off('listening', onListening);
-        this.server!.off('error', onError);
+        if (this.server) {
+          this.server.off('listening', onListening);
+          this.server.off('error', onError);
+        }
       };
 
-      this.server!.once('listening', onListening);
-      this.server!.once('error', onError);
-      this.server!.listen(this.socketPath);
+      this.server.once('listening', onListening);
+      this.server.once('error', onError);
+      this.server.listen(this.socketPath);
     });
   }
 

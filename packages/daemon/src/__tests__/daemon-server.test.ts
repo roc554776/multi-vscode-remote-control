@@ -44,7 +44,9 @@ void describe('DaemonServer Integration', () => {
       });
 
       child.on('error', reject);
-      child.on('exit', (code) => resolve(code));
+      child.on('exit', (code) => {
+        resolve(code);
+      });
     });
 
     assert.strictEqual(exitCode, 0);
@@ -56,8 +58,17 @@ void describe('DaemonServer Integration', () => {
       extensionId: 'test-ext-1',
     });
     
-    assert.strictEqual(response.type, 'register-ack');
-    assert.strictEqual(response.success, true);
+    if (typeof response !== 'object' || response === null) {
+      throw new Error('Invalid response');
+    }
+    
+    if (!('type' in response) || !('success' in response)) {
+      throw new Error('Invalid response format');
+    }
+    
+    const r: Record<string, unknown> = response;
+    assert.strictEqual(r['type'], 'register-ack');
+    assert.strictEqual(r['success'], true);
   });
 
   void it('should return error when no extension host is available', async () => {
@@ -68,9 +79,20 @@ void describe('DaemonServer Integration', () => {
       id: 1,
     });
     
-    assert.strictEqual(response.jsonrpc, '2.0');
-    assert.ok(response.error);
-    assert.strictEqual(response.error.code, -32603);
+    if (typeof response !== 'object' || response === null) {
+      throw new Error('Invalid response');
+    }
+    
+    const r: Record<string, unknown> = response;
+    assert.strictEqual(r['jsonrpc'], '2.0');
+    
+    const error = r['error'];
+    if (typeof error !== 'object' || error === null) {
+      throw new Error('Invalid error');
+    }
+    
+    const errorObj: Record<string, unknown> = error;
+    assert.strictEqual(errorObj['code'], -32603);
   });
 
   void it('should recover from stale socket on startup (unix)', async () => {
@@ -90,11 +112,16 @@ void describe('DaemonServer Integration', () => {
       extensionId: 'test-ext-recovery',
     });
 
-    assert.strictEqual(response.type, 'register-ack');
-    assert.strictEqual(response.success, true);
+    if (typeof response !== 'object' || response === null) {
+      throw new Error('Invalid response');
+    }
+    
+    const r: Record<string, unknown> = response;
+    assert.strictEqual(r['type'], 'register-ack');
+    assert.strictEqual(r['success'], true);
   });
 
-  async function sendMessage(message: unknown): Promise<any> {
+  async function sendMessage(message: unknown): Promise<unknown> {
     return new Promise((resolve, reject) => {
       const socket = net.createConnection(daemonSocketPath, () => {
         socket.write(JSON.stringify(message) + '\n');
@@ -102,7 +129,7 @@ void describe('DaemonServer Integration', () => {
 
       let buffer = '';
 
-      socket.on('data', (data) => {
+      const onData = (data: Buffer) => {
         buffer += data.toString();
 
         const lines = buffer.split('\n');
@@ -112,27 +139,40 @@ void describe('DaemonServer Integration', () => {
           if (line.trim()) {
             try {
               const response: unknown = JSON.parse(line);
+              cleanup();
               socket.end();
               resolve(response);
               return;
             } catch (err) {
+              cleanup();
               socket.end();
               reject(new Error(`Failed to parse response: ${String(err)}`));
               return;
             }
           }
         }
-      });
+      };
 
-      socket.on('error', (err) => {
+      const onError = (err: Error) => {
+        cleanup();
         reject(new Error(`Socket error: ${err.message}`));
-      });
+      };
 
-      socket.on('timeout', () => {
+      const onTimeout = () => {
+        cleanup();
         socket.destroy();
         reject(new Error('Request timeout'));
-      });
+      };
 
+      const cleanup = () => {
+        socket.off('data', onData);
+        socket.off('error', onError);
+        socket.off('timeout', onTimeout);
+      };
+
+      socket.on('data', onData);
+      socket.on('error', onError);
+      socket.on('timeout', onTimeout);
       socket.setTimeout(10000);
     });
   }
@@ -153,7 +193,9 @@ void describe('DaemonServer Integration', () => {
       });
 
       child.on('error', reject);
-      child.on('exit', () => resolve());
+      child.on('exit', () => {
+        resolve();
+      });
     });
   }
 });
