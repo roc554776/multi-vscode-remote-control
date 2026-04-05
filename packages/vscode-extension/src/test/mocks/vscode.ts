@@ -4,5 +4,5 @@ export const Uri = {
 };
 
 export const commands = {
-  executeCommand: async () => undefined,
+  executeCommand: () => Promise.resolve(undefined),
 };
