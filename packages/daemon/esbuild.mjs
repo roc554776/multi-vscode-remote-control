@@ -23,6 +23,7 @@ const modulesBuildOptions = {
     'src/daemon-server.ts',
     'src/extension-registry.ts',
     'src/router.ts',
+    'src/socket-path.ts',
     'src/types.ts',
   ],
   bundle: false,

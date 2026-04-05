@@ -1,9 +1,9 @@
 import * as net from 'node:net';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import * as os from 'node:os';
 import { ExtensionRegistry } from './extension-registry.js';
 import { Router } from './router.js';
+import { getDaemonSocketPath } from './socket-path.js';
 import type {
   InternalMessage,
   RegisterMessage,
@@ -26,15 +26,13 @@ export class DaemonServer {
   constructor() {
     this.registry = new ExtensionRegistry();
     this.router = new Router();
+    this.socketPath = getDaemonSocketPath();
 
-    if (process.platform === 'win32') {
-      this.socketPath = '\\\\.\\pipe\\multi-vscode-daemon';
-    } else {
-      const dir = path.join(os.homedir(), '.multi-vscode-remote-control');
+    if (process.platform !== 'win32') {
+      const dir = path.dirname(this.socketPath);
       if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { mode: 0o700 });
+        fs.mkdirSync(dir, { mode: 0o700, recursive: true });
       }
-      this.socketPath = path.join(dir, 'daemon.sock');
     }
   }
 

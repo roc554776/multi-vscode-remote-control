@@ -2,20 +2,16 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import * as net from 'node:net';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import * as os from 'node:os';
+import { getDaemonSocketPath } from './daemon-socket-path.js';
 
 export class DaemonSpawner {
   private socketPath: string;
   private daemonPath: string;
+  private spawnedProcess: ChildProcess | null = null;
+  private spawnedByThisProcess = false;
 
   constructor() {
-    const dir = path.join(os.homedir(), '.multi-vscode-remote-control');
-    
-    if (process.platform === 'win32') {
-      this.socketPath = '\\\\.\\pipe\\multi-vscode-daemon';
-    } else {
-      this.socketPath = path.join(dir, 'daemon.sock');
-    }
+    this.socketPath = getDaemonSocketPath();
 
     // daemon の実行ファイルのパスを解決
     // 開発時とパッケージ時で異なる可能性があるため、複数のパスを試す
@@ -118,18 +114,49 @@ export class DaemonSpawner {
 
   private spawn(log: (message: string) => void): ChildProcess {
     try {
+      const detached = process.env.MULTI_VSCODE_DAEMON_DETACHED !== '0';
       const child = spawn('node', [this.daemonPath], {
-        detached: true,
+        detached,
         stdio: 'ignore',
+        env: {
+          ...process.env,
+          MULTI_VSCODE_SOCKET_PATH: this.socketPath,
+        },
       });
 
-      child.unref();
+      if (detached) {
+        child.unref();
+      } else {
+        this.spawnedProcess = child;
+        this.spawnedByThisProcess = true;
+      }
 
       log('Daemon spawn initiated');
       return child;
     } catch (err) {
       log(`Failed to spawn daemon: ${String(err)}`);
       throw err;
+    }
+  }
+
+  stopSpawnedDaemon(log: (message: string) => void): void {
+    if (!this.spawnedByThisProcess || !this.spawnedProcess) {
+      return;
+    }
+
+    const pid = this.spawnedProcess.pid;
+    if (!pid) {
+      return;
+    }
+
+    try {
+      process.kill(pid, 'SIGTERM');
+      log(`Stopped spawned daemon (pid: ${pid.toString()})`);
+    } catch (err) {
+      log(`Failed to stop spawned daemon: ${String(err)}`);
+    } finally {
+      this.spawnedProcess = null;
+      this.spawnedByThisProcess = false;
     }
   }
 }
