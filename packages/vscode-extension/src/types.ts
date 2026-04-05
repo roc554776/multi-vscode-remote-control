@@ -107,3 +107,10 @@ export const CommandExecuteParamsSchema = z.object({
 });
 
 export type CommandExecuteParams = z.infer<typeof CommandExecuteParamsSchema>;
+
+// chat.status result
+export interface ChatStatusResult {
+  open: boolean;
+  focused: boolean;
+  busy: null;
+}
