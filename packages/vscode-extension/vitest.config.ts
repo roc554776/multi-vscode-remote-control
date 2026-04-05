@@ -20,6 +20,12 @@ export default defineConfig({
     alias: {
       vscode: path.resolve(__dirname, 'src/test/mocks/vscode.ts'),
     },
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'lcov'],
+      include: ['src/**/*.ts'],
+      exclude: ['src/**/*.spec.ts', 'src/test/**', 'dist/**'],
+    },
   },
   resolve: {
     conditions: ['node', 'import'],
