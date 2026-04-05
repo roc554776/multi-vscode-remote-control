@@ -33,6 +33,10 @@ vi.mock('./chat-send-handler.js', () => ({
   handleChatSend: vi.fn(async () => ({ jsonrpc: '2.0', result: { success: true }, id: 1 })),
 }));
 
+vi.mock('./chat-new-session-handler.js', () => ({
+  handleChatNewSession: vi.fn(async () => ({ jsonrpc: '2.0', result: { success: true }, id: 1 })),
+}));
+
 import { dispatch } from './index.js';
 
 describe('dispatch', () => {
@@ -64,6 +68,22 @@ describe('dispatch', () => {
     expect(response).toEqual({
       jsonrpc: '2.0',
       result: undefined,
+      id: 1,
+    });
+  });
+
+  it('dispatches chat.newSession request', async () => {
+    const request: JsonRpcRequest = {
+      jsonrpc: '2.0',
+      method: 'chat.newSession',
+      id: 3,
+    };
+
+    const response = await dispatch(request);
+
+    expect(response).toEqual({
+      jsonrpc: '2.0',
+      result: { success: true },
       id: 1,
     });
   });

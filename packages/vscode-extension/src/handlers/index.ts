@@ -9,6 +9,7 @@ import { handleWindowQuit } from './window-quit-handler.js';
 import { handleFileOpen } from './file-open-handler.js';
 import { handleChatSend } from './chat-send-handler.js';
 import { handleChatOpen } from './chat-open-handler.js';
+import { handleChatNewSession } from './chat-new-session-handler.js';
 import { handleChatQuery } from './chat-query-handler.js';
 
 type Handler = (request: JsonRpcRequest) => JsonRpcResponse | Promise<JsonRpcResponse>;
@@ -22,6 +23,7 @@ const handlers: Record<string, Handler> = {
   'window.quit': handleWindowQuit,
   'file.open': handleFileOpen,
   'chat.open': handleChatOpen,
+  'chat.newSession': handleChatNewSession,
   'chat.send': handleChatSend,
   'chat.query': handleChatQuery,
 };
