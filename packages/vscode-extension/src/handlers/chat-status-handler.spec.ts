@@ -34,7 +34,7 @@ describe('handleChatStatus', () => {
       id: 1,
     };
 
-    const response = await handleChatStatus(request);
+    const response = handleChatStatus(request);
 
     expect(response).toEqual({
       jsonrpc: '2.0',
@@ -66,7 +66,7 @@ describe('handleChatStatus', () => {
       id: 2,
     };
 
-    const response = await handleChatStatus(request);
+    const response = handleChatStatus(request);
 
     expect(response).toEqual({
       jsonrpc: '2.0',
@@ -98,7 +98,7 @@ describe('handleChatStatus', () => {
       id: 3,
     };
 
-    const response = await handleChatStatus(request);
+    const response = handleChatStatus(request);
 
     expect(response).toEqual({
       jsonrpc: '2.0',
@@ -130,7 +130,7 @@ describe('handleChatStatus', () => {
       id: 4,
     };
 
-    const response = await handleChatStatus(request);
+    const response = handleChatStatus(request);
 
     expect(response).toEqual({
       jsonrpc: '2.0',
@@ -161,7 +161,7 @@ describe('handleChatStatus', () => {
       id: 5,
     };
 
-    const response = await handleChatStatus(request);
+    const response = handleChatStatus(request);
 
     expect(response).toEqual({
       jsonrpc: '2.0',
@@ -205,7 +205,7 @@ describe('handleChatStatus', () => {
       id: 6,
     };
 
-    const response = await handleChatStatus(request);
+    const response = handleChatStatus(request);
 
     expect(response).toEqual({
       jsonrpc: '2.0',
@@ -233,7 +233,7 @@ describe('handleChatStatus', () => {
       id: 7,
     };
 
-    const response = await handleChatStatus(request);
+    const response = handleChatStatus(request);
 
     expect(response).toEqual({
       jsonrpc: '2.0',
@@ -257,7 +257,7 @@ describe('handleChatStatus', () => {
       method: 'chat.status',
     };
 
-    const response = await handleChatStatus(request);
+    const response = handleChatStatus(request);
 
     expect(response).toEqual({
       jsonrpc: '2.0',

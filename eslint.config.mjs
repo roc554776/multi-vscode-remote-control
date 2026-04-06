@@ -33,9 +33,9 @@ export default tseslint.config(
     },
   },
   {
-    files: ['**/*.test.ts', '**/__tests__/**/*.ts'],
+    files: ['**/*.test.ts', '**/*.spec.ts', '**/__tests__/**/*.ts', '**/test/**/*.ts'],
     rules: {
-      // Allow type assertions in tests for brevity
+      // Relax strict runtime-safety rules in tests/mocks for readability and test ergonomics.
       '@typescript-eslint/consistent-type-assertions': [
         'error',
         {
@@ -43,6 +43,14 @@ export default tseslint.config(
           objectLiteralTypeAssertions: 'allow',
         },
       ],
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/unbound-method': 'off',
+      '@typescript-eslint/only-throw-error': 'off',
     },
   },
   {

@@ -2,6 +2,17 @@ import * as vscode from 'vscode';
 import type { JsonRpcRequest, JsonRpcResponse, ChatSendResult } from '../types.js';
 import { ChatSendParamsSchema, JSON_RPC_ERRORS } from '../types.js';
 
+type ChatSendCommandResult = {
+  errorDetails?: {
+    code?: string;
+    message?: string;
+  };
+};
+
+function hasErrorDetails(value: unknown): value is ChatSendCommandResult {
+  return typeof value === 'object' && value !== null && Object.hasOwn(value, 'errorDetails');
+}
+
 export async function handleChatSend(request: JsonRpcRequest): Promise<JsonRpcResponse> {
   const parseResult = ChatSendParamsSchema.safeParse(request.params);
   
@@ -29,18 +40,10 @@ export async function handleChatSend(request: JsonRpcRequest): Promise<JsonRpcRe
       message: sync ? 'Prompt sent and response completed' : 'Prompt sent to chat',
     };
 
-    if (sync && commandResult) {
-      const agentResult = commandResult as {
-        errorDetails?: {
-          code?: string;
-          message?: string;
-        };
-      };
-      if (agentResult.errorDetails) {
+    if (sync && hasErrorDetails(commandResult) && commandResult.errorDetails) {
         result.response = {
-          errorDetails: agentResult.errorDetails,
+          errorDetails: commandResult.errorDetails,
         };
-      }
     }
 
     return {
