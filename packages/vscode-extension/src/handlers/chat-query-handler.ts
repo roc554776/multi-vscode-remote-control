@@ -54,7 +54,7 @@ export async function handleChatQuery(request: JsonRpcRequest): Promise<JsonRpcR
     const messages = [vscode.LanguageModelChatMessage.User(prompt)];
 
     const tokenSource = new vscode.CancellationTokenSource();
-    const timeoutId = setTimeout(() => tokenSource.cancel(), timeout);
+    const timeoutId = setTimeout(() => { tokenSource.cancel(); }, timeout);
 
     try {
       const chatResponse = await selectedModel.sendRequest(

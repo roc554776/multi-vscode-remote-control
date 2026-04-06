@@ -141,7 +141,7 @@ describe('handleFileOpen', () => {
       params: {
         path: '/workspace/src/index.ts',
         preserveFocus: 'yes',
-      } as unknown as JsonRpcRequest['params'],
+      } as unknown,
       id: 5,
     };
 

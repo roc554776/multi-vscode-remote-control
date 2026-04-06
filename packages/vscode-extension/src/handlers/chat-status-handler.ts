@@ -13,7 +13,7 @@ function isChatTab(tab: vscode.Tab): boolean {
   return input.viewType.includes('chat');
 }
 
-export async function handleChatStatus(request: JsonRpcRequest): Promise<JsonRpcResponse> {
+export function handleChatStatus(request: JsonRpcRequest): JsonRpcResponse {
   const id = request.id ?? null;
 
   try {

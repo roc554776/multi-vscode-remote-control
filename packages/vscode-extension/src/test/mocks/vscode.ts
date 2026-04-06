@@ -21,8 +21,8 @@ export const workspace = {
 };
 
 export class TabInputText {
-  uri: any;
-  constructor(uri: any) {
+  uri: { scheme: string; path: string };
+  constructor(uri: { scheme: string; path: string }) {
     this.uri = uri;
   }
 }
